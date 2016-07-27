@@ -12,7 +12,7 @@ class NewsController extends \GeorgRinger\News\Controller\NewsController {
 
 
 	/**
-	 * 
+	 *
 	 *
 	 * @param array $overwriteDemand
 	 * @return void
@@ -160,9 +160,15 @@ class NewsController extends \GeorgRinger\News\Controller\NewsController {
 					}
 					break;
 
+                case 'ecom_event_date':
+                    if ($event->getEcomEventDate()->format('Y-m-d') == $day['cd'])
+                    {
+                        $day['news'][] = $event;
+                    }
+                    break;
 			}
 		}
-		
+
 	}
 
 
@@ -230,7 +236,7 @@ class NewsController extends \GeorgRinger\News\Controller\NewsController {
 		$monthsBefore = (int)$this->settings['monthsBefore'];
 		$monthsAfter = (int)$this->settings['monthsAfter'];
 		$navigation['numberOfMonths'] = $monthsBefore + 1 + $monthsAfter;
-		
+
 		switch ((int)$this->settings['scrollMode']) {
 			case -1:
 				$monthsToScroll = $monthsBefore + $monthsAfter > 0 ? $monthsBefore + $monthsAfter : 1;

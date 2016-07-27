@@ -9,16 +9,16 @@ $EM_CONF[$_EXTKEY] = array(
 	'description' => 'Display news as calendar of the month.',
 	'author' => 'Charles Brunet',
 	'author_email' => 'charles@cbrunet.net',
-	'state' => 'stable',
+	'state' => 'excludeFromUpdates',
 	'internal' => '',
 	'uploadfolder' => '0',
 	'createDirs' => '',
 	'clearCacheOnLoad' => 0,
-	'version' => '2.0.0',
+	'version' => '2.0.1-ecom',
 	'constraints' => array(
 		'depends' => array(
 			'typo3' => '6.2.0-7.99.99',
-			'news' => '3.2.0-4.1.99',
+			'news' => '3.2.0-4.3.99',
 		),
 		'conflicts' => array(
 		),
