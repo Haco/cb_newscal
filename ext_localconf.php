@@ -10,7 +10,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXT']['news']['switchableControllerActions']['newIt
 $GLOBALS['TYPO3_CONF_VARS']['EXT']['news']['GeorgRinger\\News\\Hooks\\PageLayoutView']['extensionSummary']['cb_newscal'] = 'Cbrunet\CbNewscal\Hooks\PageLayoutView->getExtensionSummary';
 
 // Update fields in the flexform
-$GLOBALS['TYPO3_CONF_VARS']['EXT']['news']['Hooks/BackendUtility.php']['updateFlexforms']['cb_newscal'] = 'Cbrunet\CbNewscal\Hooks\BackendUtility->updateFlexforms';
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_befunc.php']['getFlexFormDSClass'][] = \Cbrunet\CbNewscal\Hooks\BackendUtility::class;
 
 $GLOBALS['TYPO3_CONF_VARS']['EXT']['news']['classes']['Controller/NewsController'][] = 'cb_newscal';
 

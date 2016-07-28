@@ -1,5 +1,4 @@
 <?php
-
 namespace Cbrunet\CbNewscal\Hooks;
 
 class BackendUtility extends \GeorgRinger\News\Hooks\BackendUtility {
@@ -69,46 +68,53 @@ EOT;
                     </settings.eventRestriction>';
 
     /**
-     * Remove unused fields in the flexform.
+     * @param array $dataStructArray
+     * @param array $conf
+     * @param array $row
+     * @param string $table
      */
-    public function updateFlexforms(&$params, &$reference) {
-        switch ($params['selectedView']) {
-            case 'News->calendar':
-                $this->updateCalendarFlexforms($params, $reference);
-                break;
-        }
-    }
+    public function getFlexFormDS_postProcessDS(&$dataStructArray, $conf, $row, $table)
+    {
+        if ($table === 'tt_content' && $row['CType'] === 'list' && $row['list_type'] === 'news_pi1') {
+            $dataArray = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($row['pi_flexform']);
+            $selectedView = $dataArray['data']['sDEF']['lDEF']['switchableControllerActions']['vDEF'];
 
-    protected function updateCalendarFlexforms(&$params, &$reference) {
-        $removedFields = array(
-            'sDEF' => 'orderBy,orderDirection,singleNews',
-            'additional' => 'limit,offset,excludeAlreadyDisplayedNews,disableOverrideDemand,list.paginate.itemsPerPage',
-            'template' => '',
-        );
-        $this->deleteFromStructure($params['dataStructure'], $removedFields);
+            if ($selectedView === 'News->calendar') {
+                // Delete unused fields
+                $removedFields = array(
+                    'sDEF' => 'orderBy,orderDirection,singleNews',
+                    'additional' => 'limit,offset,excludeAlreadyDisplayedNews,disableOverrideDemand,list.paginate.itemsPerPage',
+                    'template' => '',
+                );
+                $this->deleteFromStructure($dataStructArray, $removedFields);
 
-        unset($params['dataStructure']['sheets']['sDEF']['ROOT']['el']['settings.dateField']['TCEforms']['config']['items'][0]);  // Remove empty field
-        $params['dataStructure']['sheets']['sDEF']['ROOT']['el']['settings.dateField']['TCEforms']['config']['items'][] = array('LLL:EXT:news/Resources/Private/Language/locallang_be.xml:flexforms_general.orderBy.tstamp', 'tstamp');
-        $params['dataStructure']['sheets']['sDEF']['ROOT']['el']['settings.dateField']['TCEforms']['config']['items'][] = array('LLL:EXT:news/Resources/Private/Language/locallang_be.xml:flexforms_general.orderBy.crdate', 'crdate');
+                // Add/Remove fields from dateField
+                unset($dataStructArray['sheets']['sDEF']['ROOT']['el']['settings.dateField']['TCEforms']['config']['items'][0]);  // Remove empty field
+                $dataStructArray['sheets']['sDEF']['ROOT']['el']['settings.dateField']['TCEforms']['config']['items'][] = array('LLL:EXT:news/Resources/Private/Language/locallang_be.xml:flexforms_general.orderBy.tstamp', 'tstamp');
+                $dataStructArray['sheets']['sDEF']['ROOT']['el']['settings.dateField']['TCEforms']['config']['items'][] = array('LLL:EXT:news/Resources/Private/Language/locallang_be.xml:flexforms_general.orderBy.crdate', 'crdate');
 
-        $displayMonth = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->currentMonth);
-        $params['dataStructure']['sheets']['sDEF']['ROOT']['el'] = array_slice($params['dataStructure']['sheets']['sDEF']['ROOT']['el'], 0, 1, true) +
-                                                                   array('settings.displayMonth' => $displayMonth) +
-                                                                   array_slice($params['dataStructure']['sheets']['sDEF']['ROOT']['el'], 1, NULL, true);
-                                                               
-        $monthsBefore = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->monthsBefore);
-        $monthsAfter = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->monthsAfter);
-        if (!is_array($params['dataStructure']['sheets']['template']['ROOT']['el'])) {
-            // This should never happen...
-            $params['dataStructure']['sheets']['template']['ROOT']['el'] = array();
-        }
-        $params['dataStructure']['sheets']['template']['ROOT']['el'] = array_merge(array('settings.monthsBefore' => $monthsBefore, 'settings.monthsAfter' => $monthsAfter),
-            $params['dataStructure']['sheets']['template']['ROOT']['el']);
+                // Display month
+                $displayMonth = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->currentMonth);
+                $dataStructArray['sheets']['sDEF']['ROOT']['el'] = array_slice($dataStructArray['sheets']['sDEF']['ROOT']['el'], 0, 1, true) +
+                    array('settings.displayMonth' => $displayMonth) + array_slice($dataStructArray['sheets']['sDEF']['ROOT']['el'], 1, NULL, true);
 
-        if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('eventnews')) {
-            $eventRestrictionXml = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->eventRestrictionField);
-            $params['dataStructure']['sheets']['sDEF']['ROOT']['el'] = $params['dataStructure']['sheets']['sDEF']['ROOT']['el'] + array(
-                    'settings.eventRestriction' => $eventRestrictionXml);
+                // Add months before and months after
+                $monthsBefore = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->monthsBefore);
+                $monthsAfter = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->monthsAfter);
+                if (!is_array($dataStructArray['sheets']['template']['ROOT']['el'])) {
+                    // This should never happen...
+                    $dataStructArray['sheets']['template']['ROOT']['el'] = array();
+                }
+                $dataStructArray['sheets']['template']['ROOT']['el']['settings.monthsBefore'] = $monthsBefore;
+                $dataStructArray['sheets']['template']['ROOT']['el']['settings.monthsAfter'] = $monthsAfter;
+
+                // Eventnews
+                if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('eventnews')) {
+                    $eventRestrictionXml = \TYPO3\CMS\Core\Utility\GeneralUtility::xml2array($this->eventRestrictionField);
+                    $dataStructArray['sheets']['sDEF']['ROOT']['el'] = $dataStructArray['sheets']['sDEF']['ROOT']['el'] +
+                        array('settings.eventRestriction' => $eventRestrictionXml);
+                }
+            }
         }
     }
 }
