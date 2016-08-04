@@ -161,11 +161,12 @@ class NewsController extends \GeorgRinger\News\Controller\NewsController {
 					break;
 
                 case 'ecom_event_date':
-                    if ($event->getEcomEventDate()->format('Y-m-d') == $day['cd'])
-                    {
-                        $day['news'][] = $event;
-                    }
-                    break;
+                    if ($event->getEcomEventDate()) {
+                        if ($event->getEcomEventDate()->format('Y-m-d') == $day['cd']) {
+                            $day['news'][] = $event;
+                        }
+                   }
+                   break;
 			}
 		}
 
